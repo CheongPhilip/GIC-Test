@@ -1,0 +1,38 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "module": "ESNext",
+        "target": "ES2020",
+        "outDir": "./dist",
+        "types": [
+            "node",
+            "jest"
+        ],
+        "skipLibCheck": true,
+        "moduleResolution": "Node",
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": false
+    },
+    "exclude": [
+        "node_modules",
+        "dist",
+        "jest.config.cjs",
+        "jest.setup.ts",
+        "test",
+        "**/**.js"
+    ],
+    "tsc-alias": {
+        "verbose": true,
+        "resolveFullPaths": true,
+        "fileExtensions": {
+            "inputGlob": "{js,jsx,mjs}",
+            "outputCheck": [
+                "js",
+                "json",
+                "jsx",
+                "mjs"
+            ]
+        }
+    }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "gicassignment",
+  "type": "module",
+  "version": "1.0.0",
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev -w backend",
+    "test:backend": "npm run test -w backend"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "zod": "^3.23.8"
+  }
+}
