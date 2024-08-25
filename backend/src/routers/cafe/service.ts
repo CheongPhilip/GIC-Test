@@ -6,6 +6,7 @@ import CafeEmployee from "../../db/models/cafe_employee";
 import CustomError from "../../utils/error";
 import { HttpStatus } from "@shared/constants/enums";
 import { ICafeCreationAttributes, ICafeDeleteAttributes, ICafeUpdateAttributes } from "@shared/interfaces/ICafe";
+import { cafeValidationSchema } from "@shared/zodSchema/cafe";
 
 class CafeService {
   #creationInputValidation;
@@ -13,18 +14,9 @@ class CafeService {
   #deleteInputValidation;
 
   constructor() {
-    this.#creationInputValidation = z.object({
-      name: z.string().trim().min(1).max(255),
-      description: z.string().trim().min(1).max(255),
-      logo: z.string().optional(),
-      location: z.string().trim().min(1).max(255),
-    });
-    this.#updateInputValidation = this.#creationInputValidation.extend({
-      id: z.string().uuid(),
-    });
-    this.#deleteInputValidation = z.object({
-      id: z.string().uuid(),
-    });
+    this.#creationInputValidation = cafeValidationSchema.create;
+    this.#updateInputValidation = cafeValidationSchema.update;
+    this.#deleteInputValidation = cafeValidationSchema.delete;
   }
 
   validateCreationInput(input: Record<string, any>): ICafeCreationAttributes {
@@ -42,7 +34,9 @@ class CafeService {
   async getCafes(location?: string) {
     const whereClause: WhereOptions<Cafe> = {};
     if (location) {
-      whereClause.location = location;
+      whereClause.location = {
+        [Op.like]: `%${location}%`,
+      };
     }
     const cafes = await Cafe.findAll({
       where: whereClause,

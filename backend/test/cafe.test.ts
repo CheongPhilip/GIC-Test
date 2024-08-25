@@ -17,9 +17,9 @@ describe("CafeRouter", () => {
     let expectedOutputs: any[];
     beforeAll(async () => {
       cafes = await Cafe.bulkCreate([
-        { name: "Cafe1", description: "Description1", location: "Location1" },
-        { name: "Cafe2", description: "Description2", location: "Location2" },
-        { name: "Cafe3", description: "Description3", location: "Location1" },
+        { name: "Cafe111", description: "Description1", location: "Location1" },
+        { name: "Cafe222", description: "Description2", location: "Location2" },
+        { name: "Cafe333", description: "Description3", location: "Location1" },
       ]);
       employees = await Employee.bulkCreate([
         {
@@ -101,14 +101,14 @@ describe("CafeRouter", () => {
 
   describe("POST /cafe", () => {
     beforeAll(async () => {
-      await Cafe.bulkCreate([{ name: "Cafe100", description: "Description100", location: "Location100" }]);
+      await Cafe.bulkCreate([{ name: "Cafe11100", description: "Description100", location: "Location100" }]);
     });
     afterAll(async () => {
       await Employee.destroy({ where: {} });
       await Cafe.destroy({ where: {} });
     });
     it("should create a new cafe", async () => {
-      const input = { name: "Cafe1", description: "Description1", location: "Location1" } as ICafeCreationAttributes;
+      const input = { name: "Cafe111", description: "Description1", location: "Location1" } as ICafeCreationAttributes;
       const response = await supertest(app).post("/cafe").send(input);
       expect(response.status).toBe(HttpStatus.CREATED);
       expect(response.body.data).toMatchObject(input);
@@ -120,11 +120,11 @@ describe("CafeRouter", () => {
       expect(response.body.errors).toEqual([
         {
           code: "too_small",
-          minimum: 1,
+          minimum: 6,
           type: "string",
           inclusive: true,
           exact: false,
-          message: "String must contain at least 1 character(s)",
+          message: "String must contain at least 6 character(s)",
           path: ["name"],
         },
         {
@@ -149,24 +149,24 @@ describe("CafeRouter", () => {
     });
 
     it("should return error if name is not unique", async () => {
-      const input = { name: "Cafe100", description: "Description1", location: "Location1" } as ICafeCreationAttributes;
+      const input = { name: "Cafe11100", description: "Description1", location: "Location1" } as ICafeCreationAttributes;
       await supertest(app).post("/cafe").send(input);
       const response = await supertest(app).post("/cafe").send(input);
       expect(response.status).toBe(HttpStatus.CONFLICT);
-      expect(response.body.errors).toEqual('Duplicated unique value: {\n  "cafes_name": "Cafe100"\n}');
+      expect(response.body.errors).toEqual('Duplicated unique value: {\n  "cafes_name": "Cafe11100"\n}');
     });
   });
 
   describe("PUT /cafe", () => {
     let cafe: Cafe;
     beforeAll(async () => {
-      cafe = await Cafe.create({ name: "Cafe1", description: "Description1", location: "Location1" });
+      cafe = await Cafe.create({ name: "Cafe111", description: "Description1", location: "Location1" });
     });
     afterAll(async () => {
       await Cafe.destroy({ where: {} });
     });
     it("should update a cafe accordingly", async () => {
-      const input = { id: cafe.id, name: "Cafe2", description: "Description2", location: "Location2" } as ICafeUpdateAttributes;
+      const input = { id: cafe.id, name: "Cafe222", description: "Description2", location: "Location2" } as ICafeUpdateAttributes;
       const response = await supertest(app).put("/cafe").send(input);
       expect(response.status).toBe(HttpStatus.UPDATED);
       const updatedCafe = await Cafe.findByPk(cafe.id, { raw: true });
@@ -179,11 +179,11 @@ describe("CafeRouter", () => {
       expect(response.body.errors).toEqual([
         {
           code: "too_small",
-          minimum: 1,
+          minimum: 6,
           type: "string",
           inclusive: true,
           exact: false,
-          message: "String must contain at least 1 character(s)",
+          message: "String must contain at least 6 character(s)",
           path: ["name"],
         },
         {
@@ -209,7 +209,7 @@ describe("CafeRouter", () => {
     it("should return error if cafe is not found", async () => {
       const input = {
         id: "123e4567-e89b-12d3-a456-426614174000",
-        name: "Cafe2",
+        name: "Cafe222",
         description: "Description2",
         location: "Location2",
       } as ICafeUpdateAttributes;
@@ -225,8 +225,8 @@ describe("CafeRouter", () => {
     let cafeEmployees: CafeEmployee[];
     beforeAll(async () => {
       cafes = await Cafe.bulkCreate([
-        { name: "Cafe100", description: "Description100", location: "Location100" },
-        { name: "Cafe101", description: "Description101", location: "Location101" },
+        { name: "Cafe11100", description: "Description100", location: "Location100" },
+        { name: "Cafe11101", description: "Description101", location: "Location101" },
       ]);
       employees = await Employee.bulkCreate([
         {

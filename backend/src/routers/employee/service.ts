@@ -1,4 +1,4 @@
-import { literal, WhereOptions } from "sequelize";
+import { literal, Op, WhereOptions } from "sequelize";
 import { Cafe, Employee } from "../../db/models";
 import CustomError from "../../utils/error";
 import { z } from "zod";
@@ -9,46 +9,17 @@ import {
   IEmployeeGetAttributes,
   IEmployeeUpdateAttributes,
 } from "@shared/interfaces/IEmployee";
-import { EGender, HttpStatus } from "@shared/constants/enums";
+import { HttpStatus } from "@shared/constants/enums";
+import { employeeValidationSchema } from "@shared/zodSchema/employee";
 
 class EmployeeService {
   #creationInputValidation;
   #updateInputValidation;
   #deleteInputValidation;
   constructor() {
-    this.#creationInputValidation = z.object({
-      name: z.string().trim().min(1).max(255),
-      email_address: z.string().email(),
-      phone_number: z
-        .string()
-        .length(8)
-        .regex(/^[8|9]\d+$/),
-      gender: z.nativeEnum(EGender),
-      cafeEmployee: z
-        .object({
-          cafe_id: z.string().uuid(),
-          start_date: z
-            .string()
-            .datetime()
-            .transform((val) => new Date(val)),
-        })
-        .nullable(),
-    });
-    this.#updateInputValidation = this.#creationInputValidation.extend({
-      id: z.string().length(9),
-      cafeEmployee: z
-        .object({
-          cafe_id: z.string().uuid(),
-          start_date: z
-            .string()
-            .datetime()
-            .transform((val) => new Date(val)),
-        })
-        .nullable(),
-    });
-    this.#deleteInputValidation = z.object({
-      id: z.string().length(9),
-    });
+    this.#creationInputValidation = employeeValidationSchema.create;
+    this.#updateInputValidation = employeeValidationSchema.update;
+    this.#deleteInputValidation = employeeValidationSchema.delete;
   }
 
   validateCreationInput(input: Record<string, any>): IEmployeeCreationAttributes {
@@ -66,7 +37,9 @@ class EmployeeService {
   async getEmployees(cafe?: string) {
     const whereQuery: WhereOptions<Cafe> = {};
     if (cafe) {
-      whereQuery["$cafeEmployee.cafe.name$"] = cafe;
+      whereQuery["$cafeEmployee.cafe.name$"] = {
+        [Op.like]: `%${cafe}%`,
+      };
     }
     const employees = await Employee.findAll({
       include: [
@@ -98,20 +71,54 @@ class EmployeeService {
           phone_number: employee.phone_number,
           cafe: employee.cafeEmployee?.cafe?.name ?? "",
           days_worked: employee.cafeEmployee?.days_worked ?? 0,
-        } as IEmployeeGetAttributes)
+        }) as IEmployeeGetAttributes
     );
+  }
+
+  async getEmployeeById(id: string) {
+    const employee = await Employee.findByPk(id, {
+      include: [
+        {
+          model: CafeEmployee,
+          as: "cafeEmployee",
+          include: [
+            {
+              model: Cafe,
+              as: "cafe",
+              attributes: ["name"],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!employee) {
+      throw new CustomError(HttpStatus.NOT_FOUND, "Employee not found");
+    }
+
+    return {
+      id: employee.id,
+      name: employee.name,
+      email_address: employee.email_address,
+      phone_number: employee.phone_number,
+      cafe: employee.cafeEmployee?.cafe?.name ?? "",
+      days_worked: employee.cafeEmployee?.days_worked ?? 0,
+      cafe_id: employee.cafeEmployee?.cafe_id ?? null,
+      gender: employee.gender,
+    } as IEmployeeGetAttributes;
   }
 
   async createEmployee(input: IEmployeeCreationAttributes) {
     return await Employee.sequelize?.transaction(async (transaction) => {
-      const { cafeEmployee: cafeEmployeeInput, ...employeeInput } = input;
+      const { cafe_id, ...employeeInput } = input;
       const employee = await Employee.create(employeeInput, { transaction });
       let cafeEmployee = null;
-      if (cafeEmployeeInput) {
+      if (cafe_id) {
         cafeEmployee = await CafeEmployee.create(
           {
-            ...cafeEmployeeInput,
+            cafe_id,
             employee_id: employee.id,
+            start_date: new Date(),
           },
           { transaction }
         );
@@ -121,7 +128,7 @@ class EmployeeService {
   }
 
   async updateEmployee(input: IEmployeeUpdateAttributes) {
-    const { cafeEmployee: cafeEmployeeInput, ...employeeInput } = input;
+    const { cafe_id, ...employeeInput } = input;
     return await Employee.sequelize?.transaction(async (transaction) => {
       const employee = await Employee.findByPk(employeeInput.id, { transaction });
       if (!employee) {
@@ -129,14 +136,23 @@ class EmployeeService {
       }
 
       const cafeEmployee = await CafeEmployee.findByPk(employee.id, { transaction });
-      if (cafeEmployeeInput) {
+      if (cafe_id) {
         if (cafeEmployee) {
-          await cafeEmployee.update(cafeEmployeeInput, { transaction });
+          if (cafeEmployee.cafe_id !== cafe_id) {
+            await cafeEmployee.update(
+              {
+                cafe_id,
+                start_date: new Date(),
+              },
+              { transaction }
+            );
+          }
         } else {
           await CafeEmployee.create(
             {
-              ...cafeEmployeeInput,
+              cafe_id,
               employee_id: employee.id,
+              start_date: new Date(),
             },
             { transaction }
           );

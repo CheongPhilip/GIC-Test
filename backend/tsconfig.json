@@ -34,5 +34,10 @@
                 "mjs"
             ]
         }
-    }
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.d.ts",
+        "../shared/**/*.ts"
+    ]
 }

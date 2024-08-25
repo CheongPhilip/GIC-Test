@@ -37,8 +37,8 @@ export const initCafe = (sequelize: Sequelize) => {
         allowNull: false,
         validate: {
           len: {
-            args: [1, 255],
-            msg: "Name length must be between 1 and 255",
+            args: [6, 10],
+            msg: "Name length must be between 6 and 10",
           },
         },
       },

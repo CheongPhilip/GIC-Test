@@ -16,9 +16,9 @@ describe("EmployeeRouter", () => {
     let expectedOutput: any[];
     beforeAll(async () => {
       cafes = await Cafe.bulkCreate([
-        { name: "Cafe1", description: "two employees", location: "Location1" },
-        { name: "Cafe2", description: "one employees", location: "Location2" },
-        { name: "Cafe3", description: "one employees", location: "Location3" },
+        { name: "Cafe111", description: "two employees", location: "Location1" },
+        { name: "Cafe222", description: "one employees", location: "Location2" },
+        { name: "Cafe333", description: "one employees", location: "Location3" },
       ]);
       employees = await Employee.bulkCreate([
         {
@@ -130,10 +130,132 @@ describe("EmployeeRouter", () => {
     });
   });
 
+  describe("GET /employee/:id", () => {
+    let cafes: Cafe[];
+    let employees: Employee[];
+    let cafeEmployees: CafeEmployee[];
+    let expectedOutput: any[];
+    beforeAll(async () => {
+      cafes = await Cafe.bulkCreate([
+        { name: "Cafe111", description: "two employees", location: "Location1" },
+        { name: "Cafe222", description: "one employees", location: "Location2" },
+        { name: "Cafe333", description: "one employees", location: "Location3" },
+      ]);
+      employees = await Employee.bulkCreate([
+        {
+          name: "John Doe",
+          email_address: "john_doe@gmail.com",
+          phone_number: "80808080",
+          gender: EGender.MALE,
+        },
+        {
+          name: "John Doe2",
+          email_address: "john_doe2@gmail.com",
+          phone_number: "80808081",
+          gender: EGender.FEMALE,
+        },
+        {
+          name: "John Doe3",
+          email_address: "john_doe3@gmail.com",
+          phone_number: "80808083",
+          gender: EGender.MALE,
+        },
+        {
+          name: "John Doe4",
+          email_address: "john_doe4@gmail.com",
+          phone_number: "90909090",
+          gender: EGender.FEMALE,
+        },
+        {
+          name: "John Doe5",
+          email_address: "john_doe5@gmail.com",
+          phone_number: "90909090",
+          gender: EGender.FEMALE,
+        },
+      ]);
+      cafeEmployees = await CafeEmployee.bulkCreate([
+        {
+          cafe_id: cafes[0].id,
+          employee_id: employees[0].id,
+          start_date: new Date("2022-04-23"),
+        },
+        {
+          cafe_id: cafes[0].id,
+          employee_id: employees[1].id,
+          start_date: new Date("2022-02-01"),
+        },
+        {
+          cafe_id: cafes[1].id,
+          employee_id: employees[2].id,
+          start_date: new Date("2022-11-01"),
+        },
+        {
+          cafe_id: cafes[2].id,
+          employee_id: employees[3].id,
+          start_date: new Date("2022-04-01"),
+        },
+      ]);
+      expectedOutput = cafeEmployees
+        .sort((a, b) => a.start_date.getTime() - b.start_date.getTime())
+        .map((_cafeEmployee) => {
+          const _employee = employees.find((e) => e.id === _cafeEmployee.employee_id);
+          if (!_employee) {
+            throw new Error("Employee not found on initilzation");
+          }
+          return {
+            id: _employee?.id,
+            name: _employee.name,
+            email_address: _employee.email_address,
+            phone_number: _employee.phone_number,
+            cafe: cafes.find((c) => c.id === _cafeEmployee.cafe_id)?.name ?? "",
+            days_worked: _cafeEmployee.days_worked,
+          };
+        });
+      employees.forEach((employee) => {
+        const cafeEmployee = cafeEmployees.find((ce) => ce.employee_id === employee.id);
+        if (!cafeEmployee) {
+          expectedOutput.push({
+            id: employee.id,
+            name: employee.name,
+            email_address: employee.email_address,
+            phone_number: employee.phone_number,
+            cafe: "",
+            days_worked: 0,
+          });
+        }
+      });
+    });
+    afterAll(async () => {
+      await Employee.destroy({ where: {} });
+      await Cafe.destroy({ where: {} });
+    });
+    it("should return the employee details", async () => {
+      const employee = employees[0];
+      const cafeEmployee = cafeEmployees.find((ce) => ce.employee_id === employee.id);
+      const expectedOutput = {
+        id: employee.id,
+        name: employee.name,
+        email_address: employee.email_address,
+        phone_number: employee.phone_number,
+        gender: employee.gender,
+        cafe: cafes.find((c) => c.id === cafeEmployee?.cafe_id)?.name ?? "",
+        days_worked: cafeEmployee?.days_worked ?? 0,
+        cafe_id: cafeEmployee?.cafe_id,
+      };
+      const response = await supertest(app).get(`/employee/${employee.id}`);
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body.data).toEqual(expectedOutput);
+    });
+    it("should return an error if the employee does not exist", async () => {
+      const response = await supertest(app).get(`/employee/0bdd3575-988e-4f33-a620-8b108e794fc0`);
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+    });
+  });
+
   describe("POST /employee", () => {
     let cafe: Cafe;
     beforeAll(async () => {
-      cafe = await Cafe.create({ name: "Cafe1", description: "Decsription1", location: "Location1" });
+      cafe = await Cafe.create({ name: "Cafe111", description: "Decsription1", location: "Location1" });
     });
     afterAll(async () => {
       await Employee.destroy({ where: {} });
@@ -151,20 +273,22 @@ describe("EmployeeRouter", () => {
       expect(response.status).toBe(HttpStatus.CREATED);
       expect(response.body.data).toMatchObject(input);
     });
-    it("should allow to add employee with cafe_id and start_date", async () => {
+    it("should allow to add employee with cafe_id and update start_date", async () => {
       const input = {
         name: "John Doe2",
         email_address: "john_doe2@gmail.com",
         phone_number: "80808080",
         gender: EGender.FEMALE,
-        cafeEmployee: { cafe_id: cafe?.id, start_date: new Date("2022-01-01") },
+        cafe_id: cafe.id,
       } as IEmployeeCreationAttributes;
       const response = await supertest(app).post("/employee").send(input);
       expect(response.status).toBe(HttpStatus.CREATED);
-      expect(response.body.data).toMatchObject({
-        ...input,
-        cafeEmployee: { ...input.cafeEmployee, start_date: input.cafeEmployee?.start_date?.toISOString() },
-      });
+      const createdEmployee = await Employee.findByPk(response.body.data.id, { include: [{ model: CafeEmployee, as: "cafeEmployee" }] });
+      expect(createdEmployee?.name).toBe(input.name);
+      expect(createdEmployee?.email_address).toBe(input.email_address);
+      expect(createdEmployee?.phone_number).toBe(input.phone_number);
+      expect(createdEmployee?.gender).toBe(input.gender);
+      expect(createdEmployee?.cafeEmployee?.cafe_id).toBe(input.cafe_id);
     });
     it("should return an error if the cafe does not exist", async () => {
       const input = {
@@ -172,10 +296,7 @@ describe("EmployeeRouter", () => {
         email_address: "john_doe@gmail.com",
         phone_number: "80808080",
         gender: EGender.FEMALE,
-        cafeEmployee: {
-          cafe_id: "0bdd3575-988e-4f33-a620-8b108e794fc0",
-          start_date: new Date("2022-01-01"),
-        },
+        cafe_id: "0bdd3575-988e-4f33-a620-8b108e794fc0",
       } as IEmployeeCreationAttributes;
       const response = await supertest(app).post("/employee").send(input);
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
@@ -197,11 +318,11 @@ describe("EmployeeRouter", () => {
       expect(response.body.errors).toEqual([
         {
           code: "too_small",
-          minimum: 1,
+          minimum: 6,
           type: "string",
           inclusive: true,
           exact: false,
-          message: "String must contain at least 1 character(s)",
+          message: "String must contain at least 6 character(s)",
           path: ["name"],
         },
         {
@@ -232,18 +353,6 @@ describe("EmployeeRouter", () => {
           path: ["gender"],
           message: "Invalid enum value. Expected 'male' | 'female', received 'abc'",
         },
-        {
-          validation: "uuid",
-          code: "invalid_string",
-          message: "Invalid uuid",
-          path: ["cafeEmployee", "cafe_id"],
-        },
-        {
-          code: "invalid_string",
-          validation: "datetime",
-          message: "Invalid datetime",
-          path: ["cafeEmployee", "start_date"],
-        },
       ]);
     });
   });
@@ -253,8 +362,8 @@ describe("EmployeeRouter", () => {
     let employees: Employee[];
     beforeAll(async () => {
       cafes = await Cafe.bulkCreate([
-        { name: "Cafe1", description: "Decsription1", location: "Location1" },
-        { name: "Cafe2", description: "Decsription2", location: "Location2" },
+        { name: "Cafe111", description: "Decsription1", location: "Location1" },
+        { name: "Cafe222", description: "Decsription2", location: "Location2" },
       ]);
       employees = await Employee.bulkCreate([
         {
@@ -311,16 +420,16 @@ describe("EmployeeRouter", () => {
         email_address: "john_doe3@gmail.com",
         phone_number: "80808080",
         gender: EGender.FEMALE,
-        cafeEmployee: {
-          employee_id: employee.id,
-          cafe_id: cafe.id,
-          start_date: new Date("2019-01-01"),
-        },
+        cafe_id: cafe.id,
       } as IEmployeeUpdateAttributes;
       const response = await supertest(app).put("/employee").send(input);
       expect(response.status).toBe(HttpStatus.UPDATED);
       const updatedEmployee = await Employee.findByPk(employee.id, { include: [{ model: CafeEmployee, as: "cafeEmployee" }] });
-      expect(updatedEmployee).toMatchObject(input);
+      expect(updatedEmployee?.name).toBe(input.name);
+      expect(updatedEmployee?.email_address).toBe(input.email_address);
+      expect(updatedEmployee?.phone_number).toBe(input.phone_number);
+      expect(updatedEmployee?.gender).toBe(input.gender);
+      expect(updatedEmployee?.cafeEmployee?.cafe_id).toBe(input.cafe_id);
     });
     it("should return an error if the cafe does not exist", async () => {
       const employee = employees[0];
@@ -330,11 +439,7 @@ describe("EmployeeRouter", () => {
         email_address: "john_doe@gmail.com",
         phone_number: "80808080",
         gender: EGender.FEMALE,
-        cafeEmployee: {
-          employee_id: employee.id,
-          cafe_id: "0bdd3575-988e-4f33-a620-8b108e794fc0",
-          start_date: new Date("2022-01-01"),
-        },
+        cafe_id: "0bdd3575-988e-4f33-a620-8b108e794fc0",
       } as IEmployeeUpdateAttributes;
       const response = await supertest(app).put("/employee").send(input);
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
@@ -348,22 +453,18 @@ describe("EmployeeRouter", () => {
         email_address: "abc",
         phone_number: "abc",
         gender: "abc",
-        cafeEmployee: {
-          employee_id: employee.id,
-          cafe_id: "abc",
-          start_date: "abc",
-        },
+        cafe_id: "abc",
       };
       const response = await supertest(app).put("/employee").send(input);
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
       expect(response.body.errors).toEqual([
         {
           code: "too_small",
-          minimum: 1,
+          minimum: 6,
           type: "string",
           inclusive: true,
           exact: false,
-          message: "String must contain at least 1 character(s)",
+          message: "String must contain at least 6 character(s)",
           path: ["name"],
         },
         {
@@ -398,13 +499,7 @@ describe("EmployeeRouter", () => {
           validation: "uuid",
           code: "invalid_string",
           message: "Invalid uuid",
-          path: ["cafeEmployee", "cafe_id"],
-        },
-        {
-          code: "invalid_string",
-          validation: "datetime",
-          message: "Invalid datetime",
-          path: ["cafeEmployee", "start_date"],
+          path: ["cafe_id"],
         },
       ]);
     });
@@ -416,11 +511,7 @@ describe("EmployeeRouter", () => {
         email_address: "john_doe@gmail.com",
         phone_number: "80808080",
         gender: EGender.FEMALE,
-        cafeEmployee: {
-          employee_id: "InvalidId",
-          cafe_id: cafe.id,
-          start_date: new Date("2022-01-01"),
-        },
+        cafe_id: cafe.id,
       };
       const response = await supertest(app).put("/employee").send(input);
       expect(response.status).toBe(HttpStatus.NOT_FOUND);
@@ -435,11 +526,7 @@ describe("EmployeeRouter", () => {
         email_address: employee2.email_address,
         phone_number: "80808080",
         gender: EGender.FEMALE,
-        cafeEmployee: {
-          employee_id: employee.id,
-          cafe_id: cafe.id,
-          start_date: new Date("2022-01-01"),
-        },
+        cafe_id: cafe.id,
       };
       const response = await supertest(app).put("/employee").send(input);
       expect(response.status).toBe(HttpStatus.CONFLICT);
@@ -452,7 +539,7 @@ describe("EmployeeRouter", () => {
     let employees: Employee[];
     let cafeEmployees: CafeEmployee[];
     beforeAll(async () => {
-      cafe = await Cafe.create({ name: "Cafe1", description: "Decsription1", location: "Location1" });
+      cafe = await Cafe.create({ name: "Cafe111", description: "Decsription1", location: "Location1" });
       employees = await Employee.bulkCreate([
         {
           name: "John Doe",

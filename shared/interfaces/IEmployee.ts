@@ -5,22 +5,17 @@ export interface IEmployeeCreationAttributes {
   email_address: string;
   phone_number: string;
   gender: EGender;
-  cafeEmployee?: {
-    cafe_id: string;
-    start_date: Date;
-  } | null;
+  cafe_id?: string | null;
 }
 
-export interface IEmployeeUpdateAttributes extends Omit<IEmployeeCreationAttributes, "cafeEmployee"> {
+export interface IEmployeeUpdateAttributes extends IEmployeeCreationAttributes {
   id: string;
-  cafeEmployee?: {
-    cafe_id: string;
-    start_date: Date;
-  } | null;
+  gender: EGender;
 }
 
-export interface IEmployeeGetAttributes extends Omit<IEmployeeUpdateAttributes, "cafeEmployee" | "gender"> {
+export interface IEmployeeGetAttributes extends Omit<IEmployeeUpdateAttributes, "gender"> {
   cafe: string;
+  days_worked: number;
 }
 
 export interface IEmployeeDeleteAttributes extends Pick<IEmployeeGetAttributes, "id"> {}

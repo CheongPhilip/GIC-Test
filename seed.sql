@@ -1,0 +1,82 @@
+USE gic;
+
+-- Insert employees
+INSERT INTO employees (
+	id, name, email_address, phone_number, gender, createdAt, updatedAt
+) VALUES
+	('UIa1b2c3d', 'John Doe', 'john.doe@example.com', '81234567', 'male', NOW(), NOW()),
+	('UIe4f56h', 'Jane Smi', 'jane.smith@example.com', '91234567', 'female', NOW(), NOW()),
+	('UIi7j89l', 'Alice Jo', 'alice.johnson@example.com', '81234568', 'female', NOW(), NOW()),
+	('UIm0n12p', 'Bob Brow', 'bob.brown@example.com', '91234568', 'male', NOW(), NOW()),
+	('UIq3r45t', 'Charlie', 'charlie.davis@example.com', '81234569', 'male', NOW(), NOW()),
+	('UIu6v78x', 'Diana Ev', 'diana.evans@example.com', '91234569', 'female', NOW(), NOW()),
+	('UIy9z01b', 'Eve Fos', 'eve.foster@example.com', '81234570', 'female', NOW(), NOW()),
+	('UIc2d34f', 'Frank Gr', 'frank.green@example.com', '91234570', 'male', NOW(), NOW()),
+	('UIg5h67j', 'Grace Ha', 'grace.harris@example.com', '81234571', 'female', NOW(), NOW()),
+	('UIk8l90n', 'Hank Ing', 'hank.ingram@example.com', '91234571', 'male', NOW(), NOW()),
+	('UIp1q23s', 'Ivy Jack', 'ivy.jackson@example.com', '81234572', 'female', NOW(), NOW()),
+	('UIt4u56w', 'Jack Kin', 'jack.king@example.com', '91234572', 'male', NOW(), NOW()),
+	('UIx7y89a', 'Karen Le', 'karen.lewis@example.com', '81234573', 'female', NOW(), NOW()),
+	('UIb0c12e', 'Leo Mill', 'leo.miller@example.com', '91234573', 'male', NOW(), NOW()),
+	('UIf3g45i', 'Mona Nel', 'mona.nelson@example.com', '81234574', 'female', NOW(), NOW()),
+	('UIj6k78m', 'Nina Owe', 'nina.owens@example.com', '91234574', 'female', NOW(), NOW()),
+	('UIn9o01q', 'Oscar Pe', 'oscar.perez@example.com', '81234575', 'male', NOW(), NOW()),
+	('UIr2s34u', 'Paul Qui', 'paul.quinn@example.com', '91234575', 'male', NOW(), NOW()),
+	('UIv5w67y', 'Quincy Ro', 'quincy.roberts@example.com', '81234576', 'male', NOW(), NOW()),
+	('UIz8a90c', 'Rachel S', 'rachel.scott@example.com', '91234576', 'female', NOW(), NOW()),
+	('UId1e23g', 'Sam Tayl', 'sam.taylor@example.com', '81234577', 'male', NOW(), NOW()),
+	('UIh4i56k', 'Tina Und', 'tina.underwood@example.com', '91234577', 'female', NOW(), NOW()),
+	('UIl7m89o', 'Uma Vanc', 'uma.vance@example.com', '81234578', 'female', NOW(), NOW()),
+	('UIp0q12s', 'Victor W', 'victor.white@example.com', '91234578', 'male', NOW(), NOW()),
+	('UIt3u45w', 'Wendy Xa', 'wendy.xander@example.com', '81234579', 'female', NOW(), NOW()),
+	('UIx6y78a', 'Xander Y', 'xander.young@example.com', '91234579', 'male', NOW(), NOW()),
+	('UIb9c01e', 'Yara Zan', 'yara.zane@example.com', '81234580', 'female', NOW(), NOW()),
+	('UIf2g34i', 'Zack Ada', 'zack.adams@example.com', '91234580', 'male', NOW(), NOW()),
+	('UIj5k67m', 'Amy Bake', 'amy.baker@example.com', '81234581', 'female', NOW(), NOW()),
+	('UIn8o90q', 'Brian Cla', 'brian.clark@example.com', '91234581', 'male', NOW(), NOW());
+
+-- Insert cafes
+INSERT INTO cafes (id, name, description, logo, location, createdAt, updatedAt) VALUES
+	(UUID(), 'Brewed', 'A cozy place for coffee lovers.', NULL, 'New York', NOW(), NOW()),
+	(UUID(), 'Cafe Del', 'Delicious pastries and coffee.', NULL, 'Los Angeles', NOW(), NOW()),
+	(UUID(), 'Mochas', 'Specializing in mocha drinks.', NULL, 'Chicago', NOW(), NOW()),
+	(UUID(), 'Java Bar', 'Rich coffee and great ambiance.', NULL, 'San Francisco', NOW(), NOW()),
+	(UUID(), 'Roast', 'Freshly roasted coffee beans.', NULL, 'Seattle', NOW(), NOW()),
+	(UUID(), 'Blend', 'Blending flavors and experiences.', NULL, 'Austin', NOW(), NOW()),
+	(UUID(), 'Espress', 'Strong and bold coffee drinks.', NULL, 'Boston', NOW(), NOW()),
+	(UUID(), 'Steeped', 'Tea and coffee for all tastes.', NULL, 'Philadelphia', NOW(), NOW()),
+	(UUID(), 'Grounds', 'Freshly ground coffee daily.', NULL, 'San Diego', NOW(), NOW()),
+	(UUID(), 'Pek Up', 'Coffee that perks you up.', NULL, 'Denver', NOW(), NOW());
+
+-- Insert employee-cafe relationships
+INSERT INTO cafe_employee (employee_id, cafe_id, start_date) VALUES
+  ((SELECT id FROM employees LIMIT 1 OFFSET 0), (SELECT id FROM cafes LIMIT 1 OFFSET 0), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+	((SELECT id FROM employees LIMIT 1 OFFSET 1), (SELECT id FROM cafes LIMIT 1 OFFSET 1), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+	((SELECT id FROM employees LIMIT 1 OFFSET 2), (SELECT id FROM cafes LIMIT 1 OFFSET 2), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+	((SELECT id FROM employees LIMIT 1 OFFSET 3), (SELECT id FROM cafes LIMIT 1 OFFSET 3), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+	((SELECT id FROM employees LIMIT 1 OFFSET 4), (SELECT id FROM cafes LIMIT 1 OFFSET 3), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+	((SELECT id FROM employees LIMIT 1 OFFSET 5), (SELECT id FROM cafes LIMIT 1 OFFSET 5), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+	((SELECT id FROM employees LIMIT 1 OFFSET 6), (SELECT id FROM cafes LIMIT 1 OFFSET 2), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+	((SELECT id FROM employees LIMIT 1 OFFSET 7), (SELECT id FROM cafes LIMIT 1 OFFSET 7), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+	((SELECT id FROM employees LIMIT 1 OFFSET 8), (SELECT id FROM cafes LIMIT 1 OFFSET 1), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+	((SELECT id FROM employees LIMIT 1 OFFSET 9), (SELECT id FROM cafes LIMIT 1 OFFSET 9), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+	((SELECT id FROM employees LIMIT 1 OFFSET 10), (SELECT id FROM cafes LIMIT 1 OFFSET 3), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+	((SELECT id FROM employees LIMIT 1 OFFSET 11), (SELECT id FROM cafes LIMIT 1 OFFSET 1), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+	((SELECT id FROM employees LIMIT 1 OFFSET 12), (SELECT id FROM cafes LIMIT 1 OFFSET 1), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+	((SELECT id FROM employees LIMIT 1 OFFSET 13), (SELECT id FROM cafes LIMIT 1 OFFSET 3), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+	((SELECT id FROM employees LIMIT 1 OFFSET 14), (SELECT id FROM cafes LIMIT 1 OFFSET 3), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+  ((SELECT id FROM employees LIMIT 1 OFFSET 15), (SELECT id FROM cafes LIMIT 1 OFFSET 3), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+  ((SELECT id FROM employees LIMIT 1 OFFSET 16), (SELECT id FROM cafes LIMIT 1 OFFSET 3), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+  ((SELECT id FROM employees LIMIT 1 OFFSET 17), (SELECT id FROM cafes LIMIT 1 OFFSET 7), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+  ((SELECT id FROM employees LIMIT 1 OFFSET 18), (SELECT id FROM cafes LIMIT 1 OFFSET 8), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+  ((SELECT id FROM employees LIMIT 1 OFFSET 19), (SELECT id FROM cafes LIMIT 1 OFFSET 8), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+  ((SELECT id FROM employees LIMIT 1 OFFSET 20), (SELECT id FROM cafes LIMIT 1 OFFSET 9), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+  ((SELECT id FROM employees LIMIT 1 OFFSET 21), (SELECT id FROM cafes LIMIT 1 OFFSET 1), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+  ((SELECT id FROM employees LIMIT 1 OFFSET 22), (SELECT id FROM cafes LIMIT 1 OFFSET 2), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+  ((SELECT id FROM employees LIMIT 1 OFFSET 23), (SELECT id FROM cafes LIMIT 1 OFFSET 3), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+  ((SELECT id FROM employees LIMIT 1 OFFSET 24), (SELECT id FROM cafes LIMIT 1 OFFSET 4), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+  ((SELECT id FROM employees LIMIT 1 OFFSET 25), (SELECT id FROM cafes LIMIT 1 OFFSET 5), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+  ((SELECT id FROM employees LIMIT 1 OFFSET 26), (SELECT id FROM cafes LIMIT 1 OFFSET 6), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+  ((SELECT id FROM employees LIMIT 1 OFFSET 27), (SELECT id FROM cafes LIMIT 1 OFFSET 7), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+  ((SELECT id FROM employees LIMIT 1 OFFSET 28), (SELECT id FROM cafes LIMIT 1 OFFSET 8), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY)),
+  ((SELECT id FROM employees LIMIT 1 OFFSET 29), (SELECT id FROM cafes LIMIT 1 OFFSET 9), DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 730) + 365 DAY));

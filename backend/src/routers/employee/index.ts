@@ -6,6 +6,16 @@ const router = express.Router();
 
 const employeeServices = new EmployeeService();
 
+router.get("/:id", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const input = req.params;
+    const results = await employeeServices.getEmployeeById(input.id);
+    res.responseWrapper({ output: results });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const requestQuery = req.query;
