@@ -120,9 +120,6 @@ const Form: FC<Props> = (props) => {
   }, [cafeQuery.data]);
 
   const onSubmit = async (values: FormValues) => {
-    if (!values.cafe_id || values.cafe_id === "") {
-      values.cafe_id = null;
-    }
     const response = await employeeMutation.mutateAsync(values);
     return response;
   };

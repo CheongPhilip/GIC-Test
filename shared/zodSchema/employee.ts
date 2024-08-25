@@ -9,7 +9,7 @@ const commonSchema = z.object({
     .length(8)
     .regex(/^[8|9]\d+$/),
   gender: z.nativeEnum(EGender),
-  cafe_id: z.string().uuid().optional().nullable(),
+  cafe_id: z.string().optional().nullable(),
 });
 
 export const employeeValidationSchema = {

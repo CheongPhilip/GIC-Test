@@ -495,12 +495,6 @@ describe("EmployeeRouter", () => {
           path: ["gender"],
           message: "Invalid enum value. Expected 'male' | 'female', received 'abc'",
         },
-        {
-          validation: "uuid",
-          code: "invalid_string",
-          message: "Invalid uuid",
-          path: ["cafe_id"],
-        },
       ]);
     });
     it("should return an error if the employee does not exist", async () => {
