@@ -2,8 +2,8 @@
  
 1. Install Docker.
 2. Clone the repository
-3. At the root of the repo, run docker-compose build.
-4. After the build is completed, run docker-compose up. This will initialize MySQL Database and the backend and frontend applications.
-5. You will need to restart the backend application due to it will try to connect to the db while the db is still initializing.
-6. Once all 3 applications are started, navigate to http://localhost:4173 to access the application
+3. At the root of the repo, run the docker-compose build.
+4. After the build is completed, run docker-compose up. This will initialize the MySQL database, plus the backend and frontend applications.
+5. You will need to restart the backend application. This is because it initialized much faster than the database and tends to connect to it while it is not up yet, and that causes it to throw an error. 
+6. Once all three applications are started, navigate to http://localhost:4173 to check on the application
    
